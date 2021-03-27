@@ -108,10 +108,10 @@ def read_ws(ws,client):
 				packet = json.loads(msg) #entity to update...?
 				send_all_json( packet )
 
-				for key,entity in packet.items():
+				for key,value in packet.items():
 				# use the world update function with 3 pars? (self, entity, key, value)
 				# how does packet even look like?
-					print(key, entity)
+					myWorld.update(key, value, packet[key][value])
 
 			else:
 				break
@@ -123,10 +123,22 @@ def subscribe_socket(ws):
 	'''Fufill the websocket URL of /subscribe, every update notify the
 	   websocket and read updates from the websocket '''
 	# XXX: TODO IMPLEMENT ME
-	return None
-
-
-
+	# Taken from class
+	client = Client()
+	clients.append(client)
+	g = gevent.spawn( read_ws, ws, client )
+	try:
+		# print(myWorld.world())
+		ws.send(json.dumps(myWorld.world()))
+		while True:
+			# block here
+			msg = client.get()
+			ws.send(msg)
+	except Exception as e:# WebSocketError as e:
+		print("WS Error %s" % e)
+	finally:
+		clients.remove(client)
+		gevent.kill(g)
 
 # code from previous assignment copied over as is
 # I give this to you, this is how you get the raw body/data portion of a post in flask
