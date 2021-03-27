@@ -260,15 +260,20 @@ function wsSetup() {
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
         // dont know what to do here
+        console.log("Websocket opened")
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
     };
     socket.onmessage = function(msg) {
         try {
-            debug("WebSocket Recv:" + msg.data);
+            // debug("WebSocket Recv:" + msg.data);
             //XXX: TODO What are you going to do here?
-
+            // update the world with entities
+            let data = JSON.parse(msg.data)
+            for (let entity in data){
+              updateAll(entity)
+            }
         } catch (e) {
             alert("socket on message: " + e);
         }

@@ -60,6 +60,7 @@ class World:
 		return self.space
 
 #  taken from chat.py in websocketexamples form class slides repo
+# freetests seems to require webclient so i guess we are doing this
 clients = list()
 
 class Client:
@@ -72,11 +73,20 @@ class Client:
 	def get(self):
 		return self.queue.get()
 
+def send_all(msg):
+	for client in clients:
+		client.put( msg )
+
+def send_all_json(obj):
+	send_all( json.dumps(obj) )
+
 myWorld = World()
 
 def set_listener( entity, data ):
 	''' do something with the update ! '''
 	pass
+
+
 
 myWorld.add_set_listener( set_listener )
 
@@ -88,7 +98,25 @@ def hello():
 def read_ws(ws,client):
 	'''A greenlet function that reads from the websocket and updates the world'''
 	# XXX: TODO IMPLEMENT ME
-	return None
+	# from chat.py
+	'''A greenlet function that reads from the websocket'''
+	try:
+		while True:
+			msg = ws.receive()
+			print("WS RECV: %s" % msg)
+			if (msg is not None):
+				packet = json.loads(msg) #entity to update...?
+				send_all_json( packet )
+
+				for key,entity in packet.items():
+				# use the world update function with 3 pars? (self, entity, key, value)
+				# how does packet even look like?
+					print(key, entity)
+
+			else:
+				break
+	except:
+		'''Done'''
 
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
